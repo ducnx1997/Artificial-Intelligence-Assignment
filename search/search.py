@@ -90,20 +90,20 @@ def depthFirstSearch(problem):
     #print "Start:", problem.getStartState()
     #print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     #print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    visited = set()
     state = problem.getStartState()
     stack = util.Stack()
+    visited = set()
     stack.push(state)
     visited.add(state)
     traceState = {}
     traceAction = {}
     while not stack.isEmpty():
         state = stack.pop()
+        visited.add(state)
         if problem.isGoalState(state): break
         successors = problem.getSuccessors(state)
         for nextState, action, cost in successors:
             if nextState not in visited:
-                visited.add(nextState)
                 stack.push(nextState)
                 traceState[nextState] = state
                 traceAction[nextState] = action
@@ -130,8 +130,8 @@ def breadthFirstSearch(problem):
         successors = problem.getSuccessors(state)
         for nextState, action, cost in successors:
             if nextState not in visited:
-                visited.add(nextState)
                 queue.push(nextState)
+                visited.add(nextState)
                 traceState[nextState] = state
                 traceAction[nextState] = action
     actions = []
@@ -144,7 +144,30 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    state = problem.getStartState()
+    pqueue = util.PriorityQueue()
+    pqueue.push(state, 0)
+    visited = set()
+    visited.add(state)
+    traceState = {}
+    traceAction = {}
+    while not pqueue.isEmpty():
+        state = pqueue.pop()
+        visited.add(state)
+        if problem.isGoalState(state): break
+        successors = problem.getSuccessors(state)
+        for nextState, action, cost in successors:
+            if nextState not in visited:
+                pqueue.push(nextState, cost)
+                #visited.add(nextState)
+                traceState[nextState] = state
+                traceAction[nextState] = action
+    actions = []
+    while state in traceState:
+        actions.insert(0, traceAction[state])
+        state = traceState[state]
+    return actions
+    #util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
