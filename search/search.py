@@ -146,26 +146,19 @@ def uniformCostSearch(problem):
     "*** YOUR CODE HERE ***"
     state = problem.getStartState()
     pqueue = util.PriorityQueue()
-    pqueue.push(state, 0)
+    pqueue.push((state, []), 0)
     visited = set()
-    visited.add(state)
-    traceState = {}
-    traceAction = {}
     while not pqueue.isEmpty():
-        state = pqueue.pop()
+        state, path = pqueue.pop()
+        if state in visited: continue
         visited.add(state)
-        if problem.isGoalState(state): break
+        if problem.isGoalState(state): return path
         successors = problem.getSuccessors(state)
         for nextState, action, cost in successors:
             if nextState not in visited:
-                pqueue.push(nextState, cost)
-                #visited.add(nextState)
-                traceState[nextState] = state
-                traceAction[nextState] = action
+                nextPath = path + [action]
+                pqueue.push((nextState, nextPath), problem.getCostOfActions(nextPath))
     actions = []
-    while state in traceState:
-        actions.insert(0, traceAction[state])
-        state = traceState[state]
     return actions
     #util.raiseNotDefined()
 
