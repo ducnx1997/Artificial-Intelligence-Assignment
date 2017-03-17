@@ -94,11 +94,12 @@ def depthFirstSearch(problem):
     stack = util.Stack()
     visited = set()
     stack.push(state)
-    visited.add(state)
+    #visited.add(state)
     traceState = {}
     traceAction = {}
     while not stack.isEmpty():
         state = stack.pop()
+        if state in visited: continue
         visited.add(state)
         if problem.isGoalState(state): break
         successors = problem.getSuccessors(state)
