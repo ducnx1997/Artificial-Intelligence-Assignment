@@ -288,6 +288,11 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.index = {}
+        self.index[(1, 1)] = 0
+        self.index[(1, top)] = 1
+        self.index[(right, 1)] = 2
+        self.index[(right, top)] = 3
 
     def getStartState(self):
         """
@@ -295,7 +300,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        
+        return (self.startingPosition, 0)
         #util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -303,7 +308,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state[1] == 15
+        #util.raiseNotDefined()
 
     def getSuccessors(self, state):
         """
@@ -316,6 +322,12 @@ class CornersProblem(search.SearchProblem):
             is the incremental cost of expanding to that successor
         """
 
+        def getBit(i, j):
+            return (i >> j) & 1
+
+        def onBit(i, j):
+            return i | (1 << j)
+
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
@@ -326,7 +338,15 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                if (nextx, nexty) in self.corners:
+                    nextState = ((nextx, nexty), onBit(state[1], self.index[(nextx, nexty)]))
+                else: nextState = ((nextx, nexty), state[1])
+                cost = 1
+                successors.append( ( nextState, action, cost) )
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
