@@ -147,20 +147,26 @@ def uniformCostSearch(problem):
     "*** YOUR CODE HERE ***"
     state = problem.getStartState()
     pqueue = util.PriorityQueue()
-    pqueue.push((state, []), 0)
+    paths = {}
+    paths[state] = []
+    costState = {}
+    costState[state] = 0
     visited = set()
+    pqueue.push(state, 0)
     while not pqueue.isEmpty():
-        state, path = pqueue.pop()
+        state = pqueue.pop()
         if state in visited: continue
         visited.add(state)
-        if problem.isGoalState(state): return path
+        if problem.isGoalState(state): return paths[state]
         successors = problem.getSuccessors(state)
         for nextState, action, cost in successors:
             if nextState not in visited:
-                nextPath = path + [action]
-                pqueue.push((nextState, nextPath), problem.getCostOfActions(nextPath))
-    actions = []
-    return actions
+                nextPath = paths[state] + [action]
+                nextCost = problem.getCostOfActions(nextPath)
+                if (not paths.has_key(nextState)) or nextCost < costState[nextState]:
+                    paths[nextState] = nextPath
+                    costState[nextState] = nextCost
+                    pqueue.push(nextState, costState[nextState])
     #util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -173,7 +179,29 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    state = problem.getStartState()
+    costState = {}
+    costState[state] = 0
+    paths = {}
+    paths[state] = []
+    visited = set()
+    pqueue = util.PriorityQueue()
+    pqueue.push(state, 0)
+    while not pqueue.isEmpty():
+        state = pqueue.pop()
+        if state in visited: continue
+        if problem.isGoalState(state): return paths[state]
+        visited.add(state)
+        successors = problem.getSuccessors(state)
+        for nextState, action, cost in successors:
+            if nextState not in visited:
+                nextPath = paths[state] + [action]
+                nextCost = problem.getCostOfActions(nextPath) + heuristic(nextState, problem)
+                if (not paths.has_key(nextState)) or nextCost < costState[nextState]:
+                    paths[nextState] = nextPath
+                    costState[nextState] = nextCost
+                    pqueue.push(nextState, costState[nextState])
+    #util.raiseNotDefined()
 
 
 # Abbreviations
