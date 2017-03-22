@@ -381,7 +381,27 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    if state[1] == 15: return 0
+    def manhattanHeuristic(p1, p2): return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+    def euclideanHeuristic(p1, p2): return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
+    def getBit(i, j):
+        return (i >> j) & 1
+
+    def onBit(i, j):
+        return i | (1 << j)
+    heuristicValue1 = 999999999
+    for corner in problem.corners:
+        if (getBit(state[1], problem.index[corner])) == 0:
+            #heuristicValue += manhattanHeuristic(corner, state[0]) + euclideanHeuristic(corner, state[0])
+            heuristicValue1 = min(heuristicValue1, manhattanHeuristic(corner, state[0]))
+    heuristicValue2 = 999999999
+    for corner1 in problem.corners:
+        if (getBit(state[1], problem.index[corner1])) == 0:
+            for corner2 in problem.corners:
+                if corner1 != corner2 and (getBit(state[1], problem.index[corner2])) == 0:
+                    heuristicValue2 = min(heuristicValue2, manhattanHeuristic(corner1, corner2))
+    if heuristicValue2 == 999999999: heuristicValue2 = 0
+    return heuristicValue1 + heuristicValue2# Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
