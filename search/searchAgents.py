@@ -381,14 +381,16 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    if state[1] == 15: return 0
-    def manhattanHeuristic(p1, p2): return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-    def euclideanHeuristic(p1, p2): return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
     def getBit(i, j):
         return (i >> j) & 1
 
     def onBit(i, j):
         return i | (1 << j)
+
+    if state[1] == 15: return 0
+    def manhattanHeuristic(p1, p2): return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+    #def euclideanHeuristic(p1, p2): return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
+
     heuristicValue1 = 999999999
     for corner in problem.corners:
         if (getBit(state[1], problem.index[corner])) == 0:
@@ -402,6 +404,7 @@ def cornersHeuristic(state, problem):
                     heuristicValue2 = min(heuristicValue2, manhattanHeuristic(corner1, corner2))
     if heuristicValue2 == 999999999: heuristicValue2 = 0
     return heuristicValue1 + heuristicValue2# Default to trivial solution
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -495,7 +498,33 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    def manhattanHeuristic(p1, p2): return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+    f = {}
+    foodList = foodGrid.asList()
+    count = len(foodList) - 1
+    if count == -1: return 0
+    for food in foodList: f[food] = food
+    cost = 0
+    m = 0
+    def getRoot(x):
+        if f[x] == x: return x
+        f[x] = getRoot(f[x])
+        return f[x]
+    edges  = util.PriorityQueue()
+    cost = 999999999
+    for i in xrange(0, len(foodList)):
+        if cost > manhattanHeuristic(foodList[i], position): cost = manhattanHeuristic(foodList[i], position)
+        for j in xrange(i + 1, len(foodList)):
+            edges.push( (foodList[i], foodList[j]), manhattanHeuristic(foodList[i], foodList[j]))
+    while not edges.isEmpty():
+        x, y = edges.pop()
+        if getRoot(x) != getRoot(y):
+            f[f[x]] = f[y]
+            cost = cost + manhattanHeuristic(x, y)
+            m = m + 1
+        if m == count: break
+
+    return cost
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
