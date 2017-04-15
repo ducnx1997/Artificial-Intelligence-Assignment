@@ -201,6 +201,10 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     paths[nextState] = nextPath
                     costState[nextState] = nextCost
                     pqueue.push(nextState, costState[nextState])
+
+
+
+
     #util.raiseNotDefined()
 
 

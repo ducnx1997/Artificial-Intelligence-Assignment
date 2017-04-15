@@ -499,21 +499,52 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     def manhattanHeuristic(p1, p2): return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-    f = {}
     foodList = foodGrid.asList()
+    walls = problem.walls
     count = len(foodList) - 1
     if count == -1: return 0
-    for food in foodList: f[food] = food
+    foodSet = set(foodList)
+    def getSuccessors(state):
+        successors = []
+        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            x,y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                successors.append( nextState )
+        return successors
+
     cost = 0
+    visited = set()
+    state = position
+    queue = util.Queue()
+    visited.add(state)
+    queue.push(state)
+    d = {}
+    d[state] = 0
+    while not queue.isEmpty():
+        state = queue.pop()
+        if state in foodSet:
+            cost = d[state]
+            break
+        successors = getSuccessors(state)
+        for nextState in successors:
+            if nextState not in visited:
+                queue.push(nextState)
+                visited.add(nextState)
+                d[nextState] = d[state] + 1
+
+    f = {}
+    for food in foodList: f[food] = food
     m = 0
     def getRoot(x):
         if f[x] == x: return x
         f[x] = getRoot(f[x])
         return f[x]
     edges  = util.PriorityQueue()
-    cost = 999999999
-    for i in xrange(0, len(foodList)):
-        if cost > manhattanHeuristic(foodList[i], position): cost = manhattanHeuristic(foodList[i], position)
+    for i in xrange(0, len(foodList) - 1):
+        #if cost > manhattanHeuristic(foodList[i], position): cost = manhattanHeuristic(foodList[i], position)
         for j in xrange(i + 1, len(foodList)):
             edges.push( (foodList[i], foodList[j]), manhattanHeuristic(foodList[i], foodList[j]))
     while not edges.isEmpty():
@@ -555,6 +586,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.bfs(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -591,6 +623,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        return (x, y) in self.food.asList()
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
