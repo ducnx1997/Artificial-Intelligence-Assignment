@@ -301,7 +301,7 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         return (self.startingPosition, 0)
-        #util.raiseNotDefined()
+        util.raiseNotDefined()
 
     def isGoalState(self, state):
         """
@@ -309,7 +309,7 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         return state[1] == 15
-        #util.raiseNotDefined()
+        util.raiseNotDefined()
 
     def getSuccessors(self, state):
         """
@@ -391,19 +391,27 @@ def cornersHeuristic(state, problem):
     def manhattanHeuristic(p1, p2): return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
     #def euclideanHeuristic(p1, p2): return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
 
-    heuristicValue1 = 999999999
-    for corner in problem.corners:
-        if (getBit(state[1], problem.index[corner])) == 0:
-            #heuristicValue += manhattanHeuristic(corner, state[0]) + euclideanHeuristic(corner, state[0])
-            heuristicValue1 = min(heuristicValue1, manhattanHeuristic(corner, state[0]))
-    heuristicValue2 = 999999999
-    for corner1 in problem.corners:
-        if (getBit(state[1], problem.index[corner1])) == 0:
-            for corner2 in problem.corners:
-                if corner1 != corner2 and (getBit(state[1], problem.index[corner2])) == 0:
-                    heuristicValue2 = min(heuristicValue2, manhattanHeuristic(corner1, corner2))
-    if heuristicValue2 == 999999999: heuristicValue2 = 0
-    return heuristicValue1 + heuristicValue2# Default to trivial solution
+    heuristicValue = 999999999
+    cornerList = []
+    cornerList.append(state[0])
+    def BruteForce(tt, heuristicValue):
+        if tt == 15:
+            sum = 0
+            for i in xrange(1, len(cornerList)):
+                sum = sum + manhattanHeuristic(cornerList[i], cornerList[i - 1])
+            heuristicValue = min(heuristicValue, sum)
+            return heuristicValue
+        for corner in corners:
+            if getBit(tt, problem.index[corner]) == 0:
+                cornerList.append(corner)
+                heuristicValue = min(heuristicValue, BruteForce(onBit(tt, problem.index[corner]), heuristicValue))
+                cornerList.pop()
+
+        return heuristicValue
+
+    heuristicValue = BruteForce(state[1], heuristicValue)
+
+    return heuristicValue# Default to trivial solution
 
 
 class AStarCornersAgent(SearchAgent):
