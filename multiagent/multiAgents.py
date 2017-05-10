@@ -141,6 +141,32 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+        def maxValue(state, depth):
+            if state.isWin() or state.isLose() or depth == self.depth: return self.evaluationFunction(state)
+            value = -999999999
+            actions = state.getLegalActions(0);
+            nextAction = Directions.STOP
+            for action in actions:
+                successorState = state.generateSuccessor(0, action)
+                newValue = minValue(successorState, depth, 1)
+                if newValue > value:
+                    value = newValue
+                    nextAction = action
+            if depth == 0: return nextAction
+            return value
+
+        def minValue(state, depth, ghostIndex):
+            if state.isWin() or state.isLose() or depth == self.depth: return self.evaluationFunction(state)
+            numAgents = state.getNumAgents()
+            if numAgents == 1: return maxValue(state, depth + 1)
+            value = 999999999
+            actions = state.getLegalActions(ghostIndex)
+            for action in actions:
+                successorState = state.generateSuccessor(ghostIndex, action)
+                if ghostIndex < numAgents - 1: value = min(value, minValue(successorState, depth, ghostIndex + 1))
+                else: value = min(value, maxValue(successorState, depth + 1))
+            return value
+        return maxValue(gameState, 0)
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -153,6 +179,37 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        def maxValue(state, depth, alpha, beta):
+            if state.isWin() or state.isLose() or depth == self.depth: return self.evaluationFunction(state)
+            actions = state.getLegalActions(0)
+            value = -999999999
+            nextMove = Directions.STOP
+            for action in actions:
+                successorState = state.generateSuccessor(0, action)
+                newValue = minValue(successorState, depth, alpha, beta, 1)
+                if newValue > value:
+                    value = newValue
+                    nextMove = action
+                if value > beta: break
+                alpha = max(alpha, value)
+            if depth == 0: return nextMove
+            else: return value
+
+        def minValue(state, depth, alpha, beta, index):
+            if state.isWin() or state.isLose() or depth == self.depth: return self.evaluationFunction(state)
+            numAgents = state.getNumAgents()
+            value = 999999999
+            actions = state.getLegalActions(index)
+            for action in actions:
+                successorState = state.generateSuccessor(index, action)
+                if numAgents - 1 ==  index: newValue = maxValue(successorState, depth + 1, alpha, beta)
+                else: newValue = minValue(successorState, depth, alpha, beta, index + 1)
+                value = min(value, newValue)
+                beta = min(beta, value)
+                if value < alpha: break
+            return value
+
+        return maxValue(gameState, 0, -999999999, 999999999)
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
