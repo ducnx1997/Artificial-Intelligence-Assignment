@@ -229,7 +229,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if state.isWin() or state.isLose() or depth == self.depth: return self.evaluationFunction(state)
             actions = state.getLegalActions(0)
             value = -999999999
-            move = Directions.STOP
+            move = ""
             for action in actions:
                 successorState = state.generateSuccessor(0, action)
                 newValue = expValue(successorState, depth, 1)
@@ -250,7 +250,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 if numAgents - 1 == index: value = value + maxValue(successorState, depth + 1)
                 else: value = value + expValue(successorState, depth, index + 1)
             return float(value) / num
-        return maxValue(gameState, 0)
+        move = maxValue(gameState, 0)
+        #print move
+        return move
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
@@ -261,6 +263,12 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
+    if currentGameState.isWin(): return currentGameState.getScore()
+    if currentGameState.isLose(): return -999999999
+    position = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+    distToClosetFood = min([util.manhattanDistance(position, food) for food in foodList])
+    return currentGameState.getScore() - (distToClosetFood + len(foodList))
     util.raiseNotDefined()
 
 # Abbreviation
